@@ -7,4 +7,6 @@ router.post('/',authMiddleware,tripController.createTrip);
 
 router.get('/',authMiddleware,tripController.getTrips);
 
+router.put('/:id',authMiddleware,tripController.editTrip);
+
 module.exports = router;

@@ -17,10 +17,15 @@ const tripSchema = new mongoose.Schema({
     startDate:Date,
     endDate:Date,
     description:String,
+    budget:Number,
     isPublic:{
         type:Boolean,
         default:false,
-    }
+    },
+    locations:[{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Location"
+    }]
 },{timestamps:true});
 
 

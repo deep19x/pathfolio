@@ -17,6 +17,8 @@ router.delete('/:id',authMiddleware,tripController.deleteTrip);
 
 router.use('/:id/locations',locationRoutes);
 
-router.post('/:id/image',authMiddleware,upload.single("image",tripController.uploadTripImage));
+router.post('/:id/image',authMiddleware,upload.single("image"),tripController.uploadTripImage);
+
+router.delete('/:id/image',authMiddleware,tripController.deleteTripImage);
 
 module.exports = router;

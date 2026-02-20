@@ -1,5 +1,6 @@
 const Trip = require('../models/trip');
 const Location = require('../models/location');
+const cloudinary = require('../middlewares/cloudinary');
 
 module.exports.createTrip = async (req, res) => {
     try {
@@ -10,7 +11,7 @@ module.exports.createTrip = async (req, res) => {
 
         res.status(200).json({ success: true, data: trip });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Server Down!",error:error });
+        res.status(500).json({ success: false, message: "Server Down!", error: error });
     }
 }
 
@@ -126,7 +127,7 @@ module.exports.uploadTripImage = async (req, res) => {
             return res.status(404).json({ message: "Trip not found" });
         }
 
-        if (trip.user.toString() !== req.user._id.toString()) {
+        if (trip.user.toString() !== req.user.id) {
             return res.status(401).json({ message: "Not authorized" });
         }
 
@@ -140,6 +141,58 @@ module.exports.uploadTripImage = async (req, res) => {
     } catch (error) {
         res.status(500).json({
             message: "Server Problem",
+            error: error.message,
+        });
+    }
+}
+
+module.exports.deleteTripImage = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const trip = await Trip.findById(id);
+
+        if (!trip) {
+            return res.status(404).json({
+                success: false,
+                message: "Trip not found"
+            });
+        }
+
+        if (trip.user.toString() !== req.user.id) {
+            return res.status(403).json({
+                success: false,
+                message: "Not authorized"
+            });
+        }
+
+        if (!trip.image) {
+            return res.status(400).json({
+                success: false,
+                message: "No image to delete"
+            });
+        }
+
+        const urlParts = trip.image.split("/");
+        const fileName = urlParts[urlParts.length - 1];
+        const fileNameWithoutExt = fileName.split(".")[0];
+
+        const publicId = `trips/${fileNameWithoutExt}`;
+
+        await cloudinary.uploader.destroy(publicId);
+
+        trip.image = null;
+        await trip.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Image deleted successfully"
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
         });
     }
 }

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import Input from "../components/input"
-import { loginUser } from "../services/auth";
+import { Link } from "react-router-dom";
+import { registerUser } from "../services/auth";
 import travelImg from "../assets/login/travel.avif";
 import bgImage from "../assets/login/bg.png"
-import { Link } from "react-router-dom";
 
-
-export default function Login() {
+export default function Register() {
     const [form, setForm] = useState({
+        name: "",
         email: "",
         password: ""
     });
@@ -22,13 +22,13 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await loginUser(form);
-            localStorage.setItem('token', response.token);
-            console.log(response.token);
+            const response = await registerUser(form);
+            console.log(response);
         } catch (error) {
             console.log("Login Failed!");
         }
     }
+
     return (
         <div className="min-h-screen flex justify-center items-center bg-cover bg-center relative" style={{ backgroundImage: `url(${bgImage})` }}>
             <div className="absolute inset-0 bg-black/40"></div>
@@ -42,13 +42,22 @@ export default function Login() {
                 </div>
                 <div className="w-full md:w-1/2 p-12 flex flex-col justify-center">
                     <h2 className="text-3xl font-bold mb-2 text-gray-800">
-                        Welcome Back ✈️
+                        Create Account ✈️
                     </h2>
                     <p className="text-gray-500 mb-8">
-                        Log in to continue your journey
+                        Start your journey with Pathfolio
                     </p>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        <Input
+                            label="Name"
+                            placeholder="Enter your name"
+                            type="text"
+                            name="name"
+                            value={form.name}
+                            onChange={handleChange}
+                        />
+
                         <Input
                             label="Email"
                             placeholder="Enter your email"
@@ -71,16 +80,16 @@ export default function Login() {
                             type="submit"
                             className="w-full py-3 rounded-lg bg-linear-to-r from-indigo-500 to-purple-600 text-white font-semibold hover:scale-105 transition duration-300 shadow-md"
                         >
-                            Login
+                            Register
                         </button>
                     </form>
                     <p className="mt-6 text-sm text-gray-600 text-center">
-                        Don't have an account?{" "}
+                        Already have an account?{" "}
                         <Link
-                            to="/register"
+                            to="/login"
                             className="text-indigo-600 font-medium hover:underline"
                         >
-                            Register
+                            Login
                         </Link>
                     </p>
                 </div>

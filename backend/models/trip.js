@@ -22,6 +22,10 @@ const tripSchema = new mongoose.Schema({
         type:Boolean,
         default:false,
     },
+    image:{
+        type:String,
+        default:null,
+    },
     locations:[{
         type:mongoose.Schema.Types.ObjectId,
         ref:"Location"

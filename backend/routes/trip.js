@@ -9,6 +9,8 @@ router.post('/',authMiddleware,tripController.createTrip);
 
 router.get('/',authMiddleware,tripController.getTrips);
 
+router.get('/public',tripController.public);
+
 router.get('/:id',authMiddleware,tripController.getSingleTrip);
 
 router.put('/:id',authMiddleware,tripController.editTrip);

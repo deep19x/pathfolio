@@ -4,6 +4,7 @@ import { loginUser } from "../services/auth";
 import travelImg from "../assets/login/travel.avif";
 import bgImage from "../assets/login/bg.png"
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 
 export default function Login() {
@@ -11,6 +12,7 @@ export default function Login() {
         email: "",
         password: ""
     });
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setForm({
@@ -24,7 +26,7 @@ export default function Login() {
         try {
             const response = await loginUser(form);
             localStorage.setItem('token', response.token);
-            console.log(response.token);
+            navigate('/trips');
         } catch (error) {
             console.log("Login Failed!");
         }

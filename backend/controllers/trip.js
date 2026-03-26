@@ -196,3 +196,12 @@ module.exports.deleteTripImage = async (req, res) => {
         });
     }
 }
+
+module.exports.public = async(req,res) => {
+    try {
+        const trips = await Trip.find({isPublic:true}).populate('user','name');
+        res.status(200).json({success:true,data:trips});
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Server error' });
+    }
+}

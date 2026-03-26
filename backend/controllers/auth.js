@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 
 module.exports.registerUser = async(req, res) => {
 
-    const { name, email, password, avatar } = req.body;
+    const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
         return res.status(400).json({ success: false, message: "Please provide required information!" });
@@ -76,4 +76,19 @@ module.exports.loginUser = async(req,res) => {
         console.error("Server Problem ",error);
         res.status(500).json({success:false,message:"Server Problem",error:error});
     }
+}
+
+module.exports.getMe = async(req,res)=>{
+    try{
+        const user = await User.findById(req.user.id).select('-password');
+        if(!user) return res.status(400).json({success:false,message:"User not found!"});
+        res.status(200).json({success:true,data:user});
+    } catch (error){
+        res.status(500).json({success:false,message:"Server Error"});
+    }
+}
+
+module.exports.logoutUser = (req,res) => {
+    res.clearCookie('token');
+    res.status(200).json({success:true,message:"Logged Out Successfully"});
 }

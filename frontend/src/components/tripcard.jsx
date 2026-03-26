@@ -2,7 +2,7 @@ import { Trash2, Globe, Lock, MapPin } from 'lucide-react'
 import { deleteTrip } from '../services/trips'
 import { useNavigate } from 'react-router-dom'
 
-export default function TripCard({ trip, onDelete }) {
+export default function TripCard({ trip, onDelete, showDelete = true }) {
     const navigate = useNavigate()
 
     const handleDelete = async (e) => {
@@ -47,7 +47,7 @@ export default function TripCard({ trip, onDelete }) {
                 {/* Dates */}
                 {trip.startDate && (
                     <p className='text-xs text-gray-400 mt-2'>
-                        {new Date(trip.startDate).toLocaleDateString()} 
+                        {new Date(trip.startDate).toLocaleDateString()}
                         {trip.endDate && ` → ${new Date(trip.endDate).toLocaleDateString()}`}
                     </p>
                 )}
@@ -59,12 +59,14 @@ export default function TripCard({ trip, onDelete }) {
                     ) : (
                         <span />
                     )}
-                    <button
-                        onClick={handleDelete}
-                        className='text-gray-400 hover:text-red-500 transition'
-                    >
-                        <Trash2 size={16} />
-                    </button>
+                    {showDelete && (
+                        <button
+                            onClick={handleDelete}
+                            className='text-gray-400 hover:text-red-500 transition'
+                        >
+                            <Trash2 size={16} />
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

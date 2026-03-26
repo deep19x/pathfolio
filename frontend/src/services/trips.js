@@ -51,3 +51,16 @@ export const editTrip = async (id, tripData) => {
         }
     }
 }
+
+export const getPublicTrips = async() => {
+    try {
+        const response = await api.get('/trip/public');
+        return response.data;
+    } catch (error) {
+        if(error.response && error.response.data){
+            throw error.response.data
+        } else {
+            throw new Error('Failed to fetch');
+        }
+    }
+}

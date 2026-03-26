@@ -48,10 +48,8 @@ export default function Trips() {
 
                 {/* Loading State */}
                 {loading && (
-                    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
-                        {[1, 2, 3].map(i => (
-                            <div key={i} className='h-48 bg-gray-200 rounded-xl animate-pulse' />
-                        ))}
+                    <div className='flex justify-center items-center py-24'>
+                        <div className='w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin' />
                     </div>
                 )}
 

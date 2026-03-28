@@ -5,6 +5,8 @@ const authMiddleware = require('../middlewares/auth');
 
 router.post('/',authMiddleware,locationController.createLocation);
 
+router.get('/',authMiddleware,locationController.getLocation);
+
 router.get('/:locationId',authMiddleware,locationController.getSingleLocation);
 
 router.put('/:locationId',authMiddleware,locationController.editLocation);

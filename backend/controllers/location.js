@@ -155,3 +155,17 @@ module.exports.deleteLocation = async(req,res)=> {
         });
     }
 }
+
+module.exports.getLocation = async(req,res) => {
+    try {
+        const {id} = req.params;
+        const locations = await Location.find({trip:id}).sort({visitDate:1});
+        res.status(200).json({success:true,data:locations});
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+            error: error.message
+        });
+    }
+}

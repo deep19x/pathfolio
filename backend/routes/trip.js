@@ -11,13 +11,14 @@ router.get('/',authMiddleware,tripController.getTrips);
 
 router.get('/public',tripController.public);
 
+router.use('/:id/locations',locationRoutes);
+
 router.get('/:id',authMiddleware,tripController.getSingleTrip);
 
 router.put('/:id',authMiddleware,tripController.editTrip);
 
 router.delete('/:id',authMiddleware,tripController.deleteTrip);
 
-router.use('/:id/locations',locationRoutes);
 
 router.post('/:id/image',authMiddleware,upload.single("image"),tripController.uploadTripImage);
 

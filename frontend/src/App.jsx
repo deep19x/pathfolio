@@ -5,6 +5,7 @@ import Register from './pages/register'
 import {BrowserRouter,Routes,Route} from 'react-router-dom'
 import Trips from './pages/trips'
 import Explore from './pages/explore'
+import TripDetail from './pages/tripDetail'
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path='/register' element={<Register/>}/>
         {/* <Route path='/dashboard' element={<Dashboard/>}/> */}
         <Route path='/trips' element={<Trips/>}/>
+        <Route path='/trips/:id' element={<TripDetail/>}/>
         <Route path='/explore' element={<Explore/>}/>
       </Routes>
     </BrowserRouter>

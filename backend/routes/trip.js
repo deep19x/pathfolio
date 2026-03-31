@@ -5,7 +5,10 @@ const tripController = require('../controllers/trip');
 const locationRoutes = require('./location')
 const upload = require('../middlewares/cloudinary');
 
-router.post('/',authMiddleware,tripController.createTrip);
+const validate = require('../middlewares/validate');
+const {tripSchema,updateTripSchema} = require('../utils/tripValidator');
+
+router.post('/',validate(tripSchema),authMiddleware,tripController.createTrip);
 
 router.get('/',authMiddleware,tripController.getTrips);
 
@@ -15,7 +18,7 @@ router.use('/:id/locations',locationRoutes);
 
 router.get('/:id',authMiddleware,tripController.getSingleTrip);
 
-router.put('/:id',authMiddleware,tripController.editTrip);
+router.put('/:id',validate(updateTripSchema),authMiddleware,tripController.editTrip);
 
 router.delete('/:id',authMiddleware,tripController.deleteTrip);
 

@@ -14,6 +14,7 @@ This is a learning project designed to build hands-on experience across the full
 - Cookie-based JWT authentication (`httpOnly` cookies)
 - Multer (file uploads)
 - Cloudinary (image hosting)
+- Joi (request validation)
 
 **Frontend:**
 - React (UI framework)
@@ -35,6 +36,7 @@ This is a learning project designed to build hands-on experience across the full
 - ✅ Trip CRUD operations (Create, Read, Update, Delete)
 - ✅ Public trip discovery with `getPublicTrips` route
 - ✅ Trip detail retrieval with `getLocations` route
+- ✅ Request validation using Joi middleware for Auth, Trip, and Location APIs
 
 ### Phase 3: Frontend & Maps
 - ✅ Responsive navbar with active link highlighting
@@ -135,6 +137,11 @@ pathfolio/
 ### Code Consistency
 - Mix of `require` and `import` syntax can break service files—keep it consistent
 - Use `require` in Node.js backend files, `import` in modern frontend code
+
+### Validation
+- Always validate incoming data using middleware before controller logic
+- Joi provides better error handling compared to database-level validation
+- Separate schemas should be used for create and update operations
 
 ## 🛠️ Installation & Setup
 

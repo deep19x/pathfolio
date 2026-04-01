@@ -12,7 +12,24 @@ export default function Login() {
         email: "",
         password: ""
     });
+    const [error,setError] = useState({});
     const navigate = useNavigate();
+
+    const validate = () => {
+        let newError = {};
+
+        if(!form.email){
+            newError.email = "Email is required";
+        } else if (!/\S+@\S+\.\S+/.test(form.email)){
+            newError,email = "Enter valid email";
+        }
+
+        if(!form.password){
+            newError.password = "Password is required";
+        } else if(form.password.length < 6){
+            newError.password = "Minimum 6 characters required";
+        }
+    }
 
     const handleChange = (e) => {
         setForm({
@@ -23,6 +40,14 @@ export default function Login() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
+        const validateError = validate();
+
+        if(Object.keys(validateError).length > 0){
+            setError(validateError);
+            return;
+        }
+
         try {
             const response = await loginUser(form);
             localStorage.setItem('token', response.token);

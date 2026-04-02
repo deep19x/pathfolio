@@ -29,6 +29,8 @@ export default function Login() {
         } else if(form.password.length < 6){
             newError.password = "Minimum 6 characters required";
         }
+
+        return newError;
     }
 
     const handleChange = (e) => {
@@ -36,6 +38,11 @@ export default function Login() {
             ...form,
             [e.target.name]: e.target.value,
         });
+
+        setError((prev)=>({
+            ...prev,
+            [name]:""
+        }));
     };
 
     const handleSubmit = async (e) => {
@@ -75,6 +82,12 @@ export default function Login() {
                         Log in to continue your journey
                     </p>
 
+                    {error.general && (
+                        <p className="text-red-500 text-sm text-center">
+                            {error.general}
+                        </p>
+                    )}
+
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <Input
                             label="Email"
@@ -83,6 +96,7 @@ export default function Login() {
                             name="email"
                             value={form.email}
                             onChange={handleChange}
+                            error={error.email}
                         />
 
                         <Input
@@ -92,6 +106,7 @@ export default function Login() {
                             name="password"
                             value={form.password}
                             onChange={handleChange}
+                            error={error.password}
                         />
 
                         <button

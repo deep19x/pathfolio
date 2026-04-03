@@ -5,6 +5,7 @@ export default function Input({
     onChange,
     value,
     label,
+    error
 }) {
     return (
         <div className="flex flex-col space-y-2">
@@ -22,17 +23,19 @@ export default function Input({
                 name={name}
                 onChange={onChange}
                 value={value}
-                className="
-          w-full
-          px-4 py-3
-          rounded-lg
-          border border-gray-300
-          focus:outline-none
-          focus:ring-2 focus:ring-indigo-500
-          focus:border-indigo-500
-          transition duration-200
-        "
+                className={`
+                    w-full px-4 py-3 rounded-lg border
+                    ${error ? "border-red-500" : "border-gray-300"}
+                    focus:outline-none focus:ring-2
+                    ${error ? "focus:ring-red-500" : "focus:ring-indigo-500"}
+                    transition duration-200
+                `}
             />
+
+            
+            {error && (
+                <p className="text-red-500 text-sm">{error}</p>
+            )}
         </div>
     );
 }

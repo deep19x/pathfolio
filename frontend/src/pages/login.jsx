@@ -21,7 +21,7 @@ export default function Login() {
         if(!form.email){
             newError.email = "Email is required";
         } else if (!/\S+@\S+\.\S+/.test(form.email)){
-            newError,email = "Enter valid email";
+            newError.email = "Enter valid email";
         }
 
         if(!form.password){
@@ -34,9 +34,10 @@ export default function Login() {
     }
 
     const handleChange = (e) => {
+        const {name,value} = e.target;
         setForm({
             ...form,
-            [e.target.name]: e.target.value,
+            [name]: value,
         });
 
         setError((prev)=>({
@@ -60,7 +61,7 @@ export default function Login() {
             localStorage.setItem('token', response.token);
             navigate('/trips');
         } catch (error) {
-            console.log("Login Failed!");
+            setError({general:"Invalid email or password"});
         }
     }
     return (

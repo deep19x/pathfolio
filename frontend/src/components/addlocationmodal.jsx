@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import { createLocation } from '../services/location'
 import { X, Search } from 'lucide-react'
 
@@ -11,20 +11,48 @@ export default function AddLocationModal({ tripId, onClose, onSuccess }) {
         notes: '',
         expense: ''
     })
+
     const [searching, setSearching] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [error, setError] = useState('')
+    const [error, setError] = useState({})
     const [locationFound, setLocationFound] = useState(false)
 
-    const handleChange = (e) => {
-        setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }))
+    const validate = () => {
+        let newError = {}
+
+        // Place validation
+        if (!formData.placeName) {
+            newError.placeName = "Place name is required"
+        }
+
+        return newError
     }
 
-    // search place name → get lat/lng from Nominatim
+    const handleChange = (e) => {
+        const { name, value } = e.target
+
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }))
+
+        // Reset location if place name changes
+        if (name === "placeName") {
+            setLocationFound(false)
+        }
+
+        // Clear errors
+        setError(prev => ({
+            ...prev,
+            [name]: "",
+            general: ""
+        }))
+    }
+
     const handleSearchLocation = async () => {
         if (!formData.placeName.trim()) return
+
         setSearching(true)
-        setError('')
         setLocationFound(false)
 
         try {
@@ -33,28 +61,29 @@ export default function AddLocationModal({ tripId, onClose, onSuccess }) {
                 {
                     headers: {
                         'Accept-Language': 'en',
-                        'User-Agent': 'Pathfolio/1.0'  // Nominatim requires this
+                        'User-Agent': 'Pathfolio/1.0'
                     }
                 }
             )
+
             const data = await res.json()
 
             if (data.length === 0) {
-                setError('Place not found! Try a different name.')
+                setError({ general: 'Place not found! Try a different name.' })
                 return
             }
 
-            // automatically set lat/lng from result
             setFormData(prev => ({
                 ...prev,
                 latitude: parseFloat(data[0].lat),
                 longitude: parseFloat(data[0].lon),
-                placeName: data[0].display_name.split(',')[0] // clean name
+                placeName: data[0].display_name.split(',')[0]
             }))
+
             setLocationFound(true)
 
-        } catch (error) {
-            setError('Failed to search location. Try again.')
+        } catch (err) {
+            setError({ general: 'Failed to search location. Try again.' })
         } finally {
             setSearching(false)
         }
@@ -62,36 +91,67 @@ export default function AddLocationModal({ tripId, onClose, onSuccess }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        if (!formData.latitude || !formData.longitude) {
-            setError('Please search and confirm a location first!')
+
+        const validateError = validate()
+
+        if (Object.keys(validateError).length > 0) {
+            setError(validateError)
             return
         }
+
+        if (!formData.latitude || !formData.longitude) {
+            setError({ general: 'Please search and confirm a location first!' })
+            return
+        }
+
         setLoading(true)
-        setError('')
+
         try {
             await createLocation(tripId, formData)
             onSuccess()
-        } catch (error) {
-            setError(error.message || 'Failed to add location')
+        } catch (err) {
+            setError({ general: err.message || 'Failed to add location' })
         } finally {
             setLoading(false)
         }
     }
 
+    useEffect(()=>{
+        let newError = {};
+
+        if(formData.placeName && !locationFound){
+            newError.placeName = "Please search and confirm location";
+        }
+
+        if(formData.expense && Number(formData.expense) < 0){
+            newError.expense = "Expense cannot be negative";
+        }
+
+        setError((prev) => ({
+            ...prev,
+            ...newError
+        }));
+        
+    },[formData.placeName,formData.expense,locationFound]);
+
     return (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4'>
             <div className='bg-white rounded-xl w-full max-w-md p-6'>
 
+                {/* Header */}
                 <div className='flex justify-between items-center mb-6'>
                     <h2 className='text-xl font-semibold'>Add Location</h2>
                     <X onClick={onClose} className='cursor-pointer text-gray-400 hover:text-gray-600' />
                 </div>
 
-                {error && <p className='text-red-500 text-sm mb-4'>{error}</p>}
+                {/* General Error */}
+                {error.general && (
+                    <p className='text-red-500 text-sm mb-4'>{error.general}</p>
+                )}
 
                 <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
 
-                    {/* Place search */}
+                    {/* Place Search */}
                     <div className='flex gap-2'>
                         <input
                             type='text'
@@ -99,8 +159,8 @@ export default function AddLocationModal({ tripId, onClose, onSuccess }) {
                             placeholder='Search place name *'
                             value={formData.placeName}
                             onChange={handleChange}
-                            required
-                            className='border rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400'
+                            className={`border rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2
+                            ${error.placeName ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-400"}`}
                         />
                         <button
                             type='button'
@@ -115,14 +175,18 @@ export default function AddLocationModal({ tripId, onClose, onSuccess }) {
                             )}
                         </button>
                     </div>
+                    {error.placeName && (
+                        <p className='text-red-500 text-sm'>{error.placeName}</p>
+                    )}
 
-                    {/* Show confirmed location */}
+                    {/* Location Found */}
                     {locationFound && (
                         <div className='bg-green-50 border border-green-200 rounded-lg px-4 py-2 text-sm text-green-700'>
                             ✅ Location found: {formData.latitude}, {formData.longitude}
                         </div>
                     )}
 
+                    {/* Visit Date */}
                     <input
                         type='date'
                         name='visitDate'
@@ -130,6 +194,8 @@ export default function AddLocationModal({ tripId, onClose, onSuccess }) {
                         onChange={handleChange}
                         className='border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400'
                     />
+
+                    {/* Notes */}
                     <textarea
                         name='notes'
                         placeholder='Notes'
@@ -138,15 +204,22 @@ export default function AddLocationModal({ tripId, onClose, onSuccess }) {
                         rows={3}
                         className='border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 resize-none'
                     />
+
+                    {/* Expense */}
                     <input
                         type='number'
                         name='expense'
                         placeholder='Expense (₹)'
                         value={formData.expense}
                         onChange={handleChange}
-                        className='border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400'
+                        className={`border rounded-lg px-4 py-2 focus:outline-none focus:ring-2
+                        ${error.expense ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-400"}`}
                     />
+                    {error.expense && (
+                        <p className='text-red-500 text-sm'>{error.expense}</p>
+                    )}
 
+                    {/* Submit */}
                     <button
                         type='submit'
                         disabled={loading || !locationFound}
@@ -154,6 +227,7 @@ export default function AddLocationModal({ tripId, onClose, onSuccess }) {
                     >
                         {loading ? 'Adding...' : 'Add Location'}
                     </button>
+
                 </form>
             </div>
         </div>

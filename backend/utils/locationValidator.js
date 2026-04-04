@@ -1,7 +1,7 @@
 const Joi = require('joi');
 
 const locationSchema = Joi.object({
-    placeName : Joi.string().min(3).required(),
+    placeName : Joi.string().required(),
     latitude: Joi.number().required(),
     longitude: Joi.number().required(),
     visitDate: Joi.date().optional(),

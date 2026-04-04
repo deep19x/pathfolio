@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createTrip } from '../services/trips'
 import { X } from 'lucide-react'
 
@@ -22,33 +22,11 @@ export default function AddTripModal({ onClose, onSuccess }) {
         // Title
         if (!formData.title) {
             newError.title = "Title is required";
-        } else if (formData.title.length < 3) {
-            newError.title = "Minimum 3 characters required";
         }
 
         // Country
         if (!formData.country) {
             newError.country = "Country is required";
-        }
-
-        // Dates (optional but logical)
-        if (formData.startDate && formData.endDate) {
-            const start = new Date(formData.startDate);
-            const end = new Date(formData.endDate);
-
-            if (start > end) {
-                newError.endDate = "End date must be after start date";
-            }
-        }
-
-        // Description (optional)
-        if (formData.description && formData.description.length > 1000) {
-            newError.description = "Maximum 1000 characters";
-        }
-
-        // Budget (optional)
-        if (formData.budget && Number(formData.budget) < 0) {
-            newError.budget = "Budget cannot be negative";
         }
 
         return newError;
@@ -62,10 +40,10 @@ export default function AddTripModal({ onClose, onSuccess }) {
             [name]: type === 'checkbox' ? checked : value
         }));
 
-        // Clear error while typing
         setError(prev => ({
             ...prev,
-            [name]: ""
+            [name]: "",
+            general:""
         }));
     };
 
@@ -90,6 +68,37 @@ export default function AddTripModal({ onClose, onSuccess }) {
             setLoading(false);
         }
     };
+
+    useEffect(() => {
+        let newError = {};
+
+        if(formData.title && formData.title.length < 3){
+            newError.title = "Minimum 3 characters required";
+        }
+
+        if (formData.startDate && formData.endDate) {
+            const start = new Date(formData.startDate);
+            const end = new Date(formData.endDate);
+
+            if (start > end) {
+                newError.endDate = "End date must be after start date";
+            }
+        }
+
+        if (formData.description && formData.description.length > 1000) {
+            newError.description = "Maximum 1000 characters";
+        }
+
+        if (formData.budget && Number(formData.budget) < 0) {
+            newError.budget = "Budget cannot be negative";
+        }
+
+        setError((prev)=>({
+            ...prev,
+            ...newError
+        }));
+
+    },[formData.title,formData.endDate,formData.description,formData.budget]);
 
     return (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4'>

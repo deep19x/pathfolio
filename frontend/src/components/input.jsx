@@ -1,28 +1,22 @@
 export default function Input({
     type = "text",
     placeholder,
-    name,
-    onChange,
-    value,
     label,
-    error
+    error,
+    ...props
 }) {
     return (
         <div className="flex flex-col space-y-2">
             <label
-                htmlFor={name}
                 className="text-sm font-medium text-gray-700"
             >
                 {label}
             </label>
 
             <input
-                id={name}
                 type={type}
                 placeholder={placeholder}
-                name={name}
-                onChange={onChange}
-                value={value}
+                {...props}
                 className={`
                     w-full px-4 py-3 rounded-lg border
                     ${error ? "border-red-500" : "border-gray-300"}

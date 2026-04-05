@@ -1,93 +1,31 @@
-import { useEffect, useState } from "react";
 import Input from "../components/input";
 import { loginUser } from "../services/auth";
 import travelImg from "../assets/login/travel.avif";
 import bgImage from "../assets/login/bg.png";
 import { Link, useNavigate } from "react-router-dom";
+import {useForm} from 'react-hook-form'
 
 export default function Login() {
-    const [form, setForm] = useState({
-        email: "",
-        password: ""
-    });
+    const {
+        register,
+        handleSubmit,
+        formState:{errors},
+        setError
+    } = useForm();
 
-    const [error, setError] = useState({});
     const navigate = useNavigate();
 
-    
-    const validate = () => {
-        let newError = {};
-
-        if (!form.email) {
-            newError.email = "Email is required";
-        } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-            newError.email = "Enter valid email";
-        }
-
-        if (!form.password) {
-            newError.password = "Password is required";
-        } else if (form.password.length < 6) {
-            newError.password = "Minimum 6 characters required";
-        }
-
-        return newError;
-    };
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-
-        setForm(prev => ({
-            ...prev,
-            [name]: value
-        }));
-
-        
-        setError(prev => ({
-            ...prev,
-            [name]: "",
-            general: ""
-        }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        const validateError = validate();
-
-        if (Object.keys(validateError).length > 0) {
-            setError(validateError);
-            return;
-        }
-
+    const onSubmit = async(data) => {
         try {
-            const response = await loginUser(form);
-            localStorage.setItem("token", response.token);
-            navigate("/trips");
-        } catch (err) {
-            setError({ general: "Invalid email or password" });
+            const response = await loginUser(data);
+            localStorage.setItem('token',response.token);
+            navigate('/trips');
+        } catch (error) {
+            setError("root",{
+                message: "Invalid email or password"
+            });
         }
     };
-
-    
-    useEffect(() => {
-        let newError = {};
-
-        if (form.email && !/\S+@\S+\.\S+/.test(form.email)) {
-            newError.email = "Enter valid email";
-        }
-
-        if (form.password && form.password.length < 6) {
-            newError.password = "Minimum 6 characters required";
-        }
-
-        
-        setError(prev => ({
-            ...prev,
-            email: newError.email || "",
-            password: newError.password || ""
-        }));
-
-    }, [form.email, form.password]);
 
     return (
         <div
@@ -118,23 +56,27 @@ export default function Login() {
                     </p>
 
                     {/* General Error */}
-                    {error.general && (
+                    {errors.root?.message && (
                         <p className="text-red-500 text-sm text-center mb-4">
-                            {error.general}
+                            {errors.root.message}
                         </p>
                     )}
 
-                    <form onSubmit={handleSubmit} className="space-y-6">
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
                         {/* Email */}
                         <Input
                             label="Email"
                             placeholder="Enter your email"
                             type="email"
-                            name="email"
-                            value={form.email}
-                            onChange={handleChange}
-                            error={error.email}
+                            error = {errors.email?.message}
+                            {...register("email",{
+                                required:"Email is required",
+                                pattern : {
+                                    value: /\S+@\S+\.\S+/,
+                                    message:"Enter valid email"
+                                }
+                            })}
                         />
 
                         {/* Password */}
@@ -142,10 +84,14 @@ export default function Login() {
                             label="Password"
                             placeholder="Enter your password"
                             type="password"
-                            name="password"
-                            value={form.password}
-                            onChange={handleChange}
-                            error={error.password}
+                            error={errors.password?.message}
+                            {...register("password",{
+                                required: "Password is required",
+                                minLength : {
+                                    value : 6,
+                                    message: "Minimum 6 characters required"
+                                }
+                            })}
                         />
 
                         {/* Button */}

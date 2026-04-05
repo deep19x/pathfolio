@@ -1,207 +1,139 @@
-import { useEffect, useState } from 'react'
-import { createTrip } from '../services/trips'
-import { X } from 'lucide-react'
+import { useState } from 'react';
+import { createTrip } from '../services/trips';
+import { X } from 'lucide-react';
+import { useForm } from 'react-hook-form';
 
 export default function AddTripModal({ onClose, onSuccess }) {
-    const [formData, setFormData] = useState({
-        title: '',
-        country: '',
-        startDate: '',
-        endDate: '',
-        description: '',
-        budget: '',
-        isPublic: false,
-    });
 
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState({});
 
-    const validate = () => {
-        let newError = {};
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        setError
+    } = useForm();
 
-        // Title
-        if (!formData.title) {
-            newError.title = "Title is required";
-        }
-
-        // Country
-        if (!formData.country) {
-            newError.country = "Country is required";
-        }
-
-        return newError;
-    };
-
-    const handleChange = (e) => {
-        const { name, value, type, checked } = e.target;
-
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
-
-        setError(prev => ({
-            ...prev,
-            [name]: "",
-            general:""
-        }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        const validateError = validate();
-
-        if (Object.keys(validateError).length > 0) {
-            setError(validateError);
-            return;
-        }
-
-        setLoading(true); // ✅ moved after validation
-
+    const onSubmit = async (data) => {
+        setLoading(true);
         try {
-            await createTrip(formData);
+            await createTrip(data);
             onSuccess();
         } catch (err) {
-            setError({ general: "Failed to create trip" });
+            setError("root", {
+                message: "Failed to create Trip"
+            });
         } finally {
             setLoading(false);
         }
     };
 
-    useEffect(() => {
-        let newError = {};
-
-        if(formData.title && formData.title.length < 3){
-            newError.title = "Minimum 3 characters required";
-        }
-
-        if (formData.startDate && formData.endDate) {
-            const start = new Date(formData.startDate);
-            const end = new Date(formData.endDate);
-
-            if (start > end) {
-                newError.endDate = "End date must be after start date";
-            }
-        }
-
-        if (formData.description && formData.description.length > 1000) {
-            newError.description = "Maximum 1000 characters";
-        }
-
-        if (formData.budget && Number(formData.budget) < 0) {
-            newError.budget = "Budget cannot be negative";
-        }
-
-        setError((prev)=>({
-            ...prev,
-            ...newError
-        }));
-
-    },[formData.title,formData.endDate,formData.description,formData.budget]);
-
     return (
         <div className='fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 px-4'>
             <div className='bg-white rounded-xl w-full max-w-md p-6'>
 
-                {/* Header */}
                 <div className='flex justify-between items-center mb-6'>
                     <h2 className='text-xl font-semibold'>Add New Trip</h2>
                     <X onClick={onClose} className='cursor-pointer text-gray-400 hover:text-gray-600' />
                 </div>
 
-                {/* General Error */}
-                {error.general && (
-                    <p className='text-red-500 text-sm mb-4'>{error.general}</p>
+                {errors.root?.message && (
+                    <p className='text-red-500 text-sm mb-4'>{errors.root.message}</p>
                 )}
 
-                <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+                <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4'>
 
                     {/* Title */}
                     <input
                         type='text'
-                        name='title'
                         placeholder='Trip Title *'
-                        value={formData.title}
-                        onChange={handleChange}
-                        className={`border rounded-lg px-4 py-2 focus:outline-none focus:ring-2
-                        ${error.title ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-400"}`}
+                        {...register("title", {
+                            required: "Title is required",
+                            minLength: {
+                                value: 3,
+                                message: "Minimum 3 characters required"
+                            }
+                        })}
+                        className={`border rounded-lg px-4 py-2
+                        ${errors.title ? "border-red-500" : "border-gray-300"}`}
                     />
-                    {error.title && <p className='text-red-500 text-sm'>{error.title}</p>}
+                    {errors.title && <p className='text-red-500 text-sm'>{errors.title.message}</p>}
 
                     {/* Country */}
                     <input
                         type='text'
-                        name='country'
                         placeholder='Country *'
-                        value={formData.country}
-                        onChange={handleChange}
-                        className={`border rounded-lg px-4 py-2 focus:outline-none focus:ring-2
-                        ${error.country ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-400"}`}
+                        {...register("country", {
+                            required: "Country is required"
+                        })}
+                        className={`border rounded-lg px-4 py-2
+                        ${errors.country ? "border-red-500" : "border-gray-300"}`}
                     />
-                    {error.country && <p className='text-red-500 text-sm'>{error.country}</p>}
+                    {errors.country && <p className='text-red-500 text-sm'>{errors.country.message}</p>}
 
                     {/* Dates */}
                     <div className='flex gap-3'>
                         <input
                             type='date'
-                            name='startDate'
-                            value={formData.startDate}
-                            onChange={handleChange}
-                            className='border rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-400'
+                            {...register("startDate")}
+                            className='border rounded-lg px-4 py-2 w-full'
                         />
                         <input
                             type='date'
-                            name='endDate'
-                            value={formData.endDate}
-                            onChange={handleChange}
-                            className={`border rounded-lg px-4 py-2 w-full focus:outline-none focus:ring-2
-                            ${error.endDate ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-400"}`}
+                            {...register("endDate", {
+                                validate: (value, formValues) => {
+                                    if (!value || !formValues.startDate) return true;
+                                    return new Date(value) >= new Date(formValues.startDate)
+                                        || "End date must be after start date";
+                                }
+                            })}
+                            className={`border rounded-lg px-4 py-2 w-full
+                            ${errors.endDate ? "border-red-500" : "border-gray-300"}`}
                         />
                     </div>
-                    {error.endDate && <p className='text-red-500 text-sm'>{error.endDate}</p>}
+                    {errors.endDate && <p className='text-red-500 text-sm'>{errors.endDate.message}</p>}
 
                     {/* Description */}
                     <textarea
-                        name='description'
                         placeholder='Description'
-                        value={formData.description}
-                        onChange={handleChange}
                         rows={3}
-                        className={`border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 resize-none
-                        ${error.description ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-400"}`}
+                        {...register("description", {
+                            maxLength: {
+                                value: 1000,
+                                message: "Maximum 1000 characters"
+                            }
+                        })}
+                        className='border rounded-lg px-4 py-2'
                     />
-                    {error.description && <p className='text-red-500 text-sm'>{error.description}</p>}
+                    {errors.description && <p className='text-red-500 text-sm'>{errors.description.message}</p>}
 
                     {/* Budget */}
                     <input
                         type='number'
-                        name='budget'
                         placeholder='Budget (₹)'
-                        value={formData.budget}
-                        onChange={handleChange}
-                        className={`border rounded-lg px-4 py-2 focus:outline-none focus:ring-2
-                        ${error.budget ? "border-red-500 focus:ring-red-500" : "border-gray-300 focus:ring-blue-400"}`}
+                        {...register("budget", {
+                            validate: (value) => {
+                                if (!value) return true;
+                                return value >= 0 || "Budget cannot be negative";
+                            }
+                        })}
+                        className='border rounded-lg px-4 py-2'
                     />
-                    {error.budget && <p className='text-red-500 text-sm'>{error.budget}</p>}
+                    {errors.budget && <p className='text-red-500 text-sm'>{errors.budget.message}</p>}
 
-                    {/* Public toggle */}
+                    {/* Public */}
                     <label className='flex items-center gap-3 cursor-pointer'>
                         <input
                             type='checkbox'
-                            name='isPublic'
-                            checked={formData.isPublic}
-                            onChange={handleChange}
-                            className='w-4 h-4 accent-blue-600'
+                            {...register("isPublic")}
                         />
                         <span className='text-sm text-gray-600'>Make this trip public</span>
                     </label>
 
-                    {/* Button */}
                     <button
                         type='submit'
                         disabled={loading}
-                        className='bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition disabled:opacity-50'
+                        className='bg-blue-600 text-white py-2 rounded-lg'
                     >
                         {loading ? 'Creating...' : 'Create Trip'}
                     </button>
@@ -209,5 +141,5 @@ export default function AddTripModal({ onClose, onSuccess }) {
                 </form>
             </div>
         </div>
-    )
+    );
 }

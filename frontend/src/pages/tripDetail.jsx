@@ -54,6 +54,12 @@ export default function TripDetail() {
                         <h1 className='text-3xl font-bold text-gray-800'>{trip?.title}</h1>
                         <p className='text-gray-500 mt-1'>{trip?.country}</p>
 
+                        {trip?.description && (
+                            <p className='text-gray-600 mt-2 max-w-xl'>
+                                {trip.description}
+                            </p>
+                        )}
+
                         {/* Dates */}
                         {trip?.startDate && (
                             <div className='flex items-center gap-2 mt-2 text-sm text-gray-400'>

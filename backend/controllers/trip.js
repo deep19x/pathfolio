@@ -46,6 +46,14 @@ module.exports.editTrip = async (req, res) => {
             trip.description = req.body.description;
         }
 
+        if (req.body.startDate !== undefined) {
+            trip.startDate = req.body.startDate;
+        }
+
+        if (req.body.endDate !== undefined) {
+            trip.endDate = req.body.endDate;
+        }
+
         if (req.body.isPublic !== undefined) {
             trip.isPublic = req.body.isPublic;
         }
@@ -197,10 +205,10 @@ module.exports.deleteTripImage = async (req, res) => {
     }
 }
 
-module.exports.public = async(req,res) => {
+module.exports.public = async (req, res) => {
     try {
-        const trips = await Trip.find({isPublic:true}).populate('user','name');
-        res.status(200).json({success:true,data:trips});
+        const trips = await Trip.find({ isPublic: true }).populate('user', 'name');
+        res.status(200).json({ success: true, data: trips });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Server error' });
     }

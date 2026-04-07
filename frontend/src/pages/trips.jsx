@@ -8,6 +8,7 @@ import { Plus } from 'lucide-react'
 export default function Trips() {
     const [trips, setTrips] = useState([])
     const [loading, setLoading] = useState(true)
+    const [selectedTrip,setSelectedTrip] = useState(null)
     const [showModal, setShowModal] = useState(false)
 
     const fetchTrips = async () => {
@@ -19,6 +20,11 @@ export default function Trips() {
         } finally {
             setLoading(false)
         }
+    }
+
+    const handleEdit = (trip) => {
+        setSelectedTrip(trip)
+        setShowModal(true);
     }
 
     useEffect(() => {
@@ -91,6 +97,7 @@ export default function Trips() {
                                 key={trip._id}
                                 trip={trip}
                                 onDelete={fetchTrips}
+                                onEdit={handleEdit}
                             />
                         ))}
                     </div>
@@ -100,10 +107,15 @@ export default function Trips() {
             {/* Add Trip Modal */}
             {showModal && (
                 <AddTripModal
-                    onClose={() => setShowModal(false)}
+                    trip={selectedTrip}
+                    onClose={() => {
+                        setShowModal(false)
+                        setSelectedTrip(null)
+                    }}
                     onSuccess={() => {
                         setShowModal(false)
-                        fetchTrips()  // refresh list after adding
+                        fetchTrips()
+                        setSelectedTrip(null)  // refresh list after adding
                     }}
                 />
             )}

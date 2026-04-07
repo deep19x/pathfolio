@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { createTrip } from '../services/trips';
+import { useState,useEffect } from 'react';
+import { createTrip,editTrip } from '../services/trips';
 import { X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-export default function AddTripModal({ onClose, onSuccess }) {
+export default function AddTripModal({ onClose, onSuccess,trip }) {
 
     const [loading, setLoading] = useState(false);
 
@@ -11,17 +11,46 @@ export default function AddTripModal({ onClose, onSuccess }) {
         register,
         handleSubmit,
         formState: { errors },
-        setError
+        setError,
+        reset
     } = useForm();
+
+    const formatDate = (date) => {
+        return date ? date.split("T")[0] : "";
+    }
+
+    useEffect(() => {
+    if (trip) {
+        reset({
+            ...trip,
+            startDate: trip.startDate ? formatDate(trip.startDate) : "",
+            endDate: trip.endDate ? formatDate(trip.endDate) : "",
+        });
+    }
+}, [trip, reset]);
 
     const onSubmit = async (data) => {
         setLoading(true);
         try {
-            await createTrip(data);
+            const cleanData = {
+            title: data.title,
+            description: data.description,
+            country: data.country,
+            startDate: data.startDate,
+            endDate: data.endDate,
+            budget: data.budget,
+            isPublic: data.isPublic,
+            }
+            if(trip){
+                await editTrip(trip._id,cleanData);
+            } else {
+                await createTrip(data);
+            }
             onSuccess();
         } catch (err) {
+            console.log(err);
             setError("root", {
-                message: "Failed to create Trip"
+                message: trip ? "Failed to update Trip" : "Failed to create Trip"
             });
         } finally {
             setLoading(false);
@@ -33,7 +62,9 @@ export default function AddTripModal({ onClose, onSuccess }) {
             <div className='bg-white rounded-xl w-full max-w-md p-6'>
 
                 <div className='flex justify-between items-center mb-6'>
-                    <h2 className='text-xl font-semibold'>Add New Trip</h2>
+                    <h2 className='text-xl font-semibold'>
+                        {trip ? "Edit Trip" : "Add new Trip"}
+                    </h2>
                     <X onClick={onClose} className='cursor-pointer text-gray-400 hover:text-gray-600' />
                 </div>
 
@@ -135,7 +166,9 @@ export default function AddTripModal({ onClose, onSuccess }) {
                         disabled={loading}
                         className='bg-blue-600 text-white py-2 rounded-lg'
                     >
-                        {loading ? 'Creating...' : 'Create Trip'}
+                        {loading 
+                            ? (trip ? "Updating..." : "Creating...")
+                            : (trip ? "Update Trip" : "Create Trip")}
                     </button>
 
                 </form>

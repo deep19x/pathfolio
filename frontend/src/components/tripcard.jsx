@@ -1,8 +1,8 @@
-import { Trash2, Globe, Lock, MapPin } from 'lucide-react'
+import { Trash2, Globe, Lock, MapPin ,Pencil} from 'lucide-react'
 import { deleteTrip } from '../services/trips'
 import { useNavigate } from 'react-router-dom'
 
-export default function TripCard({ trip, onDelete, showDelete = true }) {
+export default function TripCard({ trip, onDelete, onEdit ,showDelete = true }) {
     const navigate = useNavigate()
 
     const handleDelete = async (e) => {
@@ -14,6 +14,11 @@ export default function TripCard({ trip, onDelete, showDelete = true }) {
         } catch (error) {
             console.error('Failed to delete trip', error)
         }
+    }
+
+    const handleEdit = (e) => {
+        e.stopPropagation();
+        onEdit(trip);
     }
 
     return (
@@ -59,14 +64,17 @@ export default function TripCard({ trip, onDelete, showDelete = true }) {
                     ) : (
                         <span />
                     )}
-                    {showDelete && (
-                        <button
-                            onClick={handleDelete}
-                            className='text-gray-400 hover:text-red-500 transition'
-                        >
-                            <Trash2 size={16} />
+                    
+                    <div className="flex gap-2">
+                        {/* Edit */}
+                        <button onClick={handleEdit} className='text-gray-400 hover:text-blue-500 transition'>
+                            <Pencil size={16}/>
                         </button>
-                    )}
+                        {/* Delete */}
+                        <button onClick={handleDelete} className='text-gray-400 hover:text-red-500 transition'>
+                            <Trash2 size={16}/>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -38,3 +38,16 @@ export const deleteLocation = async(tripId) => {
         }
     }
 }
+
+export const updateLocation = async(tripId,locationId,data) => {
+    try {
+        const response = await api.put(`/trip/${tripId}/locations/${locationId}`,data);
+        return response.data;
+    } catch (error) {
+        if(error.response && error.response.data){
+            throw error.response.data;
+        } else {
+            throw new Error("Unexpected Error");
+        }
+    }
+}

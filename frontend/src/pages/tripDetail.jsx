@@ -4,8 +4,10 @@ import Navbar from '../components/navbar'
 import TripMap from '../components/tripMap'
 import AddLocationModal from '../components/addlocationmodal'
 import { getSingleTrip } from '../services/trips'
+import { deleteLocation } from '../services/location'
 import { getLocation } from '../services/location'
 import { Plus, MapPin, Calendar, Globe, Lock } from 'lucide-react'
+import LocationCard from '../components/locationCard'
 
 export default function TripDetail() {
     const { id } = useParams()  // get trip id from URL
@@ -13,6 +15,7 @@ export default function TripDetail() {
     const [locations, setLocations] = useState([])
     const [loading, setLoading] = useState(true)
     const [showModal, setShowModal] = useState(false)
+    const [editLocation,setEditLocation] = useState(null)
 
     const fetchTripData = async () => {
         try {
@@ -26,6 +29,15 @@ export default function TripDetail() {
             console.error('Failed to fetch trip data', error)
         } finally {
             setLoading(false)
+        }
+    }
+
+    const handleDelete = async(id) => {
+        try {
+            await deleteLocation(id)
+            fetchTripData()
+        } catch (error) {
+            console.log("Delete Failed",err)
         }
     }
 
@@ -99,6 +111,12 @@ export default function TripDetail() {
                     <TripMap locations={locations} />
                 </div>
 
+                <div className='mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'>
+                    {locations.map((loc) => (
+                        <LocationCard key={loc._id} loc={loc} onEdit={(loc) => setEditLocation(loc)} onDelete={handleDelete}/>
+                    ))}
+                </div>
+
             </div>
 
             {/* Add Location Modal */}
@@ -109,6 +127,18 @@ export default function TripDetail() {
                     onSuccess={() => {
                         setShowModal(false)
                         fetchTripData()  // refresh map after adding
+                    }}
+                />
+            )}
+
+            {editLocation && (
+                <AddLocationModal
+                    tripId={id}
+                    location={editLocation}
+                    onClose={() => setEditLocation(null)}
+                    onSuccess={()=>{
+                        setEditLocation(null);
+                        fetchTripData();
                     }}
                 />
             )}

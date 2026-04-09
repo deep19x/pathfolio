@@ -1,36 +1,40 @@
 const mongoose = require('mongoose');
 
 const tripSchema = new mongoose.Schema({
-    user:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        required:true,
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
     },
-    title:{
-        type:String,
-        required:true,
+    title: {
+        type: String,
+        required: true,
     },
-    country:{
-        type:String,
-        required:true,
+    country: {
+        type: String,
+        required: true,
     },
-    startDate:Date,
-    endDate:Date,
-    description:String,
-    budget:Number,
-    isPublic:{
-        type:Boolean,
-        default:false,
+    startDate: Date,
+    endDate: Date,
+    description: String,
+    budget: Number,
+    isPublic: {
+        type: Boolean,
+        default: false,
     },
-    image:{
-        type:String,
-        default:null,
+    image: {
+        type: String,
+        default: null,
     },
-    locations:[{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Location"
+    imagePublicId: {
+        type: String,
+        default: null,
+    },
+    locations: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Location"
     }]
-},{timestamps:true});
+}, { timestamps: true });
 
 
-module.exports = mongoose.model("Trip",tripSchema);
+module.exports = mongoose.model("Trip", tripSchema);

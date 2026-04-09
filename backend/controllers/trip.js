@@ -129,6 +129,11 @@ module.exports.deleteTrip = async (req, res) => {
 module.exports.uploadTripImage = async (req, res) => {
     try {
         const { id } = req.params;
+
+        if (!req.file) {
+            return res.status(400).json({ message: "No file uploaded" });
+        }
+
         const trip = await Trip.findById(id);
 
         if (!trip) {
@@ -136,23 +141,31 @@ module.exports.uploadTripImage = async (req, res) => {
         }
 
         if (trip.user.toString() !== req.user.id) {
-            return res.status(401).json({ message: "Not authorized" });
+            return res.status(403).json({ message: "Not authorized" });
+        }
+
+        // delete old image
+        if (trip.imagePublicId) {
+            await cloudinary.uploader.destroy(trip.imagePublicId);
         }
 
         trip.image = req.file.path;
+        trip.imagePublicId = req.file.filename;
+
         await trip.save();
 
         res.status(200).json({
             message: "Image uploaded successfully",
             imageUrl: trip.image,
         });
+
     } catch (error) {
         res.status(500).json({
             message: "Server Problem",
             error: error.message,
         });
     }
-}
+};
 
 module.exports.deleteTripImage = async (req, res) => {
     try {

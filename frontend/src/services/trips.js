@@ -13,16 +13,29 @@ export const getTrips = async () => {
     }
 }
 
-export const createTrip = async (tripData) => {
+export const createTrip = async (tripData,image) => {
     try {
-        const response = await api.post('/trip', tripData)
+        const formData = new FormData();
+        const { image: _, ...cleanData } = tripData;
+
+        Object.keys(tripData).forEach(key => {
+            formData.append(key,tripData[key]);
+        });
+
+        if(image){
+            formData.append("image",image);
+        }
+        const response = await api.post('/trip', formData)
         return response.data
     } catch (error) {
-        if (error.response && error.response.data) {
-            throw error.response.data
-        } else {
-            throw new Error('Failed to create trip')
-        }
+        console.log("FULL ERROR:", error);   // 🔥 ADD THIS
+
+    if (error.response && error.response.data) {
+        console.log("BACKEND ERROR:", error.response.data); // 🔥 ADD
+        throw error.response.data
+    } else {
+        throw new Error('Failed to create trip')
+    }
     }
 }
 
@@ -39,9 +52,19 @@ export const deleteTrip = async (id) => {
     }
 }
 
-export const editTrip = async (id, tripData) => {
+export const editTrip = async (id, tripData,image) => {
     try {
-        const response = await api.put(`/trip/${id}`, tripData)
+        const formData = new FormData();
+        const { image: _, ...cleanData } = tripData;
+
+        Object.keys(tripData).forEach((key) => {
+            formData.append(key,tripData[key]);
+        });
+
+        if(image){
+            formData.append("image",image);
+        }
+        const response = await api.put(`/trip/${id}`, formData)
         return response.data
     } catch (error) {
         if (error.response && error.response.data) {

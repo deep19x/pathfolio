@@ -1,11 +1,13 @@
-import { useState,useEffect } from 'react';
-import { createTrip,editTrip } from '../services/trips';
+import { useState, useEffect } from 'react';
+import { createTrip, editTrip } from '../services/trips';
 import { X } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 
-export default function AddTripModal({ onClose, onSuccess,trip }) {
+export default function AddTripModal({ onClose, onSuccess, trip }) {
 
     const [loading, setLoading] = useState(false);
+    const [image, setImage] = useState(null);
+    const [preview, setPreview] = useState(null);
 
     const {
         register,
@@ -20,33 +22,45 @@ export default function AddTripModal({ onClose, onSuccess,trip }) {
     }
 
     useEffect(() => {
-    if (trip) {
-        reset({
-            ...trip,
-            startDate: trip.startDate ? formatDate(trip.startDate) : "",
-            endDate: trip.endDate ? formatDate(trip.endDate) : "",
-        });
+        if (trip) {
+            reset({
+                ...trip,
+                startDate: trip.startDate ? formatDate(trip.startDate) : "",
+                endDate: trip.endDate ? formatDate(trip.endDate) : "",
+            });
+        }
+    }, [trip, reset]);
+
+    const handleImageChange = (e) => {
+        const file = e.target.files[0];
+
+        if (file) {
+            setImage(file);
+            setPreview(URL.createObjectURL(file));
+        }
     }
-}, [trip, reset]);
 
     const onSubmit = async (data) => {
         setLoading(true);
         try {
             const cleanData = {
-            title: data.title,
-            description: data.description,
-            country: data.country,
-            startDate: data.startDate,
-            endDate: data.endDate,
-            budget: data.budget,
-            isPublic: data.isPublic,
-            }
-            if(trip){
-                await editTrip(trip._id,cleanData);
+                title: data.title,
+                description: data.description,
+                country: data.country,
+                startDate: data.startDate,
+                endDate: data.endDate,
+                budget: data.budget,
+                isPublic: data.isPublic,
+            };
+
+            if (trip) {
+                await editTrip(trip._id, cleanData, image);
             } else {
-                await createTrip(data);
+                await createTrip(cleanData, image);
             }
+
             onSuccess();
+
         } catch (err) {
             console.log(err);
             setError("root", {
@@ -161,12 +175,30 @@ export default function AddTripModal({ onClose, onSuccess,trip }) {
                         <span className='text-sm text-gray-600'>Make this trip public</span>
                     </label>
 
+                    <div>
+                        <label className='block text-sm mb-1'>Cover Image</label>
+
+                        <input type="file" accept='image/*' onChange={handleImageChange} className='border rounded-lg px-2 py-1 w-full' />
+
+                        {preview && (
+                            <img src={preview} alt="preview" className='mt-2 h-40 w-full object-cover rounded-lg' />
+                        )}
+
+                        {!preview && trip?.image && (
+                            <img
+                                src={trip.image}
+                                alt="trip"
+                                className="mt-2 h-40 w-full object-cover rounded-lg"
+                            />
+                        )}
+                    </div>
+
                     <button
                         type='submit'
                         disabled={loading}
                         className='bg-blue-600 text-white py-2 rounded-lg'
                     >
-                        {loading 
+                        {loading
                             ? (trip ? "Updating..." : "Creating...")
                             : (trip ? "Update Trip" : "Create Trip")}
                     </button>

@@ -8,7 +8,7 @@ const upload = require('../middlewares/cloudinary');
 const validate = require('../middlewares/validate');
 const {tripSchema,updateTripSchema} = require('../utils/tripValidator');
 
-router.post('/',validate(tripSchema),authMiddleware,tripController.createTrip);
+router.post('/',validate(tripSchema),authMiddleware,upload.single("image"),tripController.createTrip);
 
 router.get('/',authMiddleware,tripController.getTrips);
 
@@ -18,13 +18,9 @@ router.use('/:id/locations',locationRoutes);
 
 router.get('/:id',authMiddleware,tripController.getSingleTrip);
 
-router.put('/:id',validate(updateTripSchema),authMiddleware,tripController.editTrip);
+router.put('/:id',validate(updateTripSchema),authMiddleware,upload.single("image"),tripController.editTrip);
 
 router.delete('/:id',authMiddleware,tripController.deleteTrip);
 
-
-router.post('/:id/image',authMiddleware,upload.single("image"),tripController.uploadTripImage);
-
-router.delete('/:id/image',authMiddleware,tripController.deleteTripImage);
 
 module.exports = router;

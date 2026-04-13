@@ -1,13 +1,13 @@
 const Trip = require('../models/trip');
 const Location = require('../models/location');
-const cloudinary = require('../middlewares/cloudinary');
+const cloudinary = require('../config/cloudinary');
 
 module.exports.createTrip = async (req, res) => {
     try {
         let imageUrl = null;
         let imagePublicId = null;
 
-        if(req.file){
+        if (req.file) {
             imageUrl = req.file.path;
             imagePublicId = req.file.filename;
         }
@@ -15,12 +15,12 @@ module.exports.createTrip = async (req, res) => {
         const trip = await Trip.create({
             ...req.body,
             user: req.user.id,
-            image:imageUrl,
-            imagePublicId:imagePublicId
+            image: imageUrl,
+            imagePublicId: imagePublicId
         });
 
         console.log("BODY:", req.body);
-console.log("FILE:", req.file);
+        console.log("FILE:", req.file);
 
         res.status(200).json({ success: true, data: trip });
     } catch (error) {
@@ -71,24 +71,29 @@ module.exports.editTrip = async (req, res) => {
             trip.isPublic = req.body.isPublic;
         }
 
-        if(req.file){
-            if(trip.imagePublicId){
+        if (req.file) {
+            if (trip.imagePublicId) {
                 await cloudinary.uploader.destroy(trip.imagePublicId);
             }
 
             trip.image = req.file.path;
-            trip.image = req.file.filename;
+            trip.imagePublicId = req.file.filename;
         }
 
         await trip.save();
 
-        console.log("BODY:", req.body);
-console.log("FILE:", req.file);
-
         res.status(200).json({ success: true, message: "Trip is updated!", data: trip });
 
     } catch (error) {
-        res.status(500).json({ success: false, message: "Server Problem", error: error });
+
+        console.error("UPDATE ERROR:", error); // 🔥 MUST
+
+        res.status(500).json({
+            success: false,
+            message: error.message,
+            error: error
+        });
+
     }
 }
 

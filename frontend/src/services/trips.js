@@ -28,10 +28,8 @@ export const createTrip = async (tripData,image) => {
         const response = await api.post('/trip', formData)
         return response.data
     } catch (error) {
-        console.log("FULL ERROR:", error);   // 🔥 ADD THIS
 
     if (error.response && error.response.data) {
-        console.log("BACKEND ERROR:", error.response.data); // 🔥 ADD
         throw error.response.data
     } else {
         throw new Error('Failed to create trip')

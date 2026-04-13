@@ -21,15 +21,11 @@ export default function TripCard({ trip, onDelete, onEdit, showDelete = true }) 
         onEdit(trip)
     }
 
-    // 🔥 DEBUG
-    console.log("Trip Image URL:", trip.image)
-
     return (
         <div
             onClick={() => navigate(`/trips/${trip._id}`)}
             className='bg-white rounded-xl shadow-sm hover:shadow-md transition cursor-pointer border border-gray-100'
         >
-            {/* 🔥 FORCE IMAGE TEST */}
             {trip.image ? (
                 <img
                     src={trip.image.trim()}

@@ -1,5 +1,6 @@
 const Location = require('../models/location');
 const Trip = require('../models/trip');
+const cloudinary = require('../config/cloudinary');
 
 module.exports.createLocation = async(req,res) => {
     try {
@@ -20,9 +21,19 @@ module.exports.createLocation = async(req,res) => {
             });
         }
 
+        let images = [];
+
+        if(req.files){
+            images = req.files.map(file => ({
+                url:file.path,
+                public_id:file.filename
+            }));
+        }
+
         const location = await Location.create({
             ...req.body,
             trip:id,
+            images
         });
 
         trip.locations.push(location._id);
@@ -134,6 +145,12 @@ module.exports.deleteLocation = async(req,res)=> {
                 success:false,
                 message:"You're not authorized to make changes in this Location",
             });
+        }
+
+        for(let img of location.images){
+            if(img.public_id){
+                await cloudinary.uploader.destroy(img.public_id);
+            }
         }
 
         await Location.findByIdAndDelete(locationId);

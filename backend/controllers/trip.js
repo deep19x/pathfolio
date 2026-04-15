@@ -19,8 +19,6 @@ module.exports.createTrip = async (req, res) => {
             imagePublicId: imagePublicId
         });
 
-        console.log("BODY:", req.body);
-        console.log("FILE:", req.file);
 
         res.status(200).json({ success: true, data: trip });
     } catch (error) {
@@ -140,21 +138,34 @@ module.exports.deleteTrip = async (req, res) => {
             });
         }
 
+        if (trip.imagePublicId) {
+            await cloudinary.uploader.destroy(trip.imagePublicId);
+        }
+
+        const locations = await Location.find({ trip: id });
+
+        for (let loc of locations) {
+            if (loc.imagePublicId) {
+                await cloudinary.uploader.destroy(loc.imagePublicId);
+            }
+        }
+
         await Location.deleteMany({ trip: id });
         await Trip.findByIdAndDelete(id);
 
         res.status(200).json({
             success: true,
-            message: "Trip and associated locations deleted"
+            message: "Trip, locations & images deleted"
         });
+
     } catch (error) {
         res.status(500).json({
             success: false,
             message: "Server error",
-            error: error
+            error: error.message
         });
     }
-}
+};
 
 module.exports.public = async (req, res) => {
     try {

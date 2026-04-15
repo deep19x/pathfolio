@@ -27,20 +27,17 @@ export default function TripCard({ trip, onDelete, onEdit, showDelete = true }) 
             className='bg-white rounded-xl shadow-sm hover:shadow-md transition cursor-pointer border border-gray-100'
         >
             {trip.image ? (
-                <img
+                <div className='w-full aspect-4/3 overflow-hidden rounded-xl'>
+                    <img
                     src={trip.image.trim()}
                     alt={trip.title}
-                    style={{
-                        width: "100%",
-                        height: "200px",
-                        objectFit: "cover",
-                        border: "2px solid red"
-                    }}
+                    className="w-full h-full object-cover object-[center_80%] border-2 border-red-500"
                     onError={(e) => {
                         console.log("❌ Image failed to load:", trip.image)
                         e.target.style.display = "none"
                     }}
                 />
+                </div>
             ) : (
                 <div className='w-full h-48 bg-blue-500 flex items-center justify-center'>
                     <MapPin size={40} className='text-white' />

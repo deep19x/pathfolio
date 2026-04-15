@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react'
-import { createLocation, updateLocation } from '../services/location' // ⭐
+import { createLocation, updateLocation } from '../services/location' 
 import { X, Search } from 'lucide-react'
 
-export default function AddLocationModal({ tripId, location, onClose, onSuccess }) { // ⭐
+export default function AddLocationModal({ tripId, location, onClose, onSuccess }) { 
 
-    const isEdit = !!location // ⭐
+    const isEdit = !!location 
 
     const [formData, setFormData] = useState({
         placeName: '',
@@ -19,8 +19,8 @@ export default function AddLocationModal({ tripId, location, onClose, onSuccess 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState({})
     const [locationFound, setLocationFound] = useState(false)
+    const [files,setFiles] = useState([]);
 
-    // ⭐ Prefill in edit mode
     useEffect(() => {
         if (location) {
             setFormData({
@@ -54,7 +54,6 @@ export default function AddLocationModal({ tripId, location, onClose, onSuccess 
             [name]: value
         }))
 
-        // ⭐ Reset location ONLY if place changes
         if (name === "placeName") {
             setLocationFound(false)
         }
@@ -120,10 +119,19 @@ export default function AddLocationModal({ tripId, location, onClose, onSuccess 
         setLoading(true)
 
         try {
+            const data = new FormData();
+            Object.keys(formData).forEach(key => {
+                data.append(key,formData[key])
+            });
+
+            files.forEach(file => {
+                data.append("images",file);
+            });
+
             if (isEdit) {
-                await updateLocation(tripId, location._id, formData) // ⭐
+                await updateLocation(tripId, location._id, data) 
             } else {
-                await createLocation(tripId, formData)
+                await createLocation(tripId, data)
             }
 
             onSuccess()
@@ -155,7 +163,7 @@ export default function AddLocationModal({ tripId, location, onClose, onSuccess 
                 {/* Header */}
                 <div className='flex justify-between items-center mb-6'>
                     <h2 className='text-xl font-semibold'>
-                        {isEdit ? "Edit Location" : "Add Location"} {/* ⭐ */}
+                        {isEdit ? "Edit Location" : "Add Location"} 
                     </h2>
                     <X onClick={onClose} className='cursor-pointer text-gray-400 hover:text-gray-600' />
                 </div>
@@ -232,6 +240,27 @@ export default function AddLocationModal({ tripId, location, onClose, onSuccess 
 
                     {error.expense && (
                         <p className='text-red-500 text-sm'>{error.expense}</p>
+                    )}
+
+                    <input type="file" multiple accept="image/*" onChange={(e) => {
+                        const selected = [...e.target.files];
+
+                        if(selected.length > 5){
+                            alert("Max 5 images allowed");
+                            return;
+                        }
+
+                        setFiles(selected);
+                        
+                    }} className='border rounded-lg px-3 py-2' />
+
+                    {files.length > 0 && (
+                        <div className='flex gap-2 flex-wrap'>
+                            {files.map((file,index) => (
+                                <img src={URL.createObjectURL(file)} key={index}
+                                className='w-20 h-20 object-cover rounded' />
+                            ))}
+                        </div>
                     )}
 
                     <button
